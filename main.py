@@ -28,7 +28,7 @@ if __name__ == "__main__":
                 print(f"Task {task_id} is finished")
                 tasks.remove(task_id)
         print("Tasks are still not finished")
-        sleep(1)
+        sleep(10)
 
     print("Segmentation is done, now we read the results and transcribe it")
 
@@ -46,4 +46,4 @@ if __name__ == "__main__":
                 print(f"Transcription task {task} is finished")
                 transcribe_tasks.remove(task)
         print("Transcriping")
-        sleep(1)
+        sleep(10)
