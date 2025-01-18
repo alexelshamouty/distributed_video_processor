@@ -19,3 +19,12 @@ If you decide on using google cloud make sure you have the following ready befor
 gcloud init     
 gcloud auth application-default login
 ```
+
+
+You can also consider using flower if you want oo get more insights on what's happening in your broker:
+```
+pip install flower
+export FLOWER_UNAUTHENTICATED_API=true; celery -A tasks.app flower
+```
+
+![Flower Monitoring](flower.png)
