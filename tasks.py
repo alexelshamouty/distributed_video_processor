@@ -5,6 +5,7 @@ import whisper
 from celery.schedules import crontab
 from celery.app.control import Inspect
 from google.cloud import speech
+import logging
 
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6388/0')
 app.conf.update(worker_concurrency=10,result_expires=3600)
@@ -13,6 +14,9 @@ SEGMENT_DIR = 'segments'
 TRANSCRIPT_DIR = 'transcripts'
 language_model = ""
 google_client = ""
+
+logging.basicConfig(level=logging.ERROR)
+logger = logging.getLogger(__name__)
 
 @app.on_after_configure.connect
 def load_model(sender, **kwargs):
@@ -76,22 +80,25 @@ def transcribe_result(segment_path):
 
 @app.task
 def cloud_transcribe_result(segment_path):
-    segment_path = segment_path.strip()
-    with open(segment_path,"rb") as f:
-        content = f.read().strip()
-    audio = speech.RecognitionAudio(content=content)
-    config = speech.RecognitionConfig(
-        encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-        language_code="en-US",
-        model="video",  # Chosen model
-    )
-    response = google_client.recognize(config=config, audio=audio)
-    text = response.results[0].alternatives[0].transcript
-    transcription_path = os.path.join(
-        TRANSCRIPT_DIR, os.path.basename(segment_path).replace(".wav","_transcription.txt")
-    )
-    with open(transcription_path,"w") as f:
-        f.write(text)
+    try:
+        segment_path = segment_path.strip()
+        with open(segment_path,"rb") as f:
+            content = f.read().strip()
+        audio = speech.RecognitionAudio(content=content)
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            language_code="en-US",
+            model="video",  # Chosen model
+        )
+        response = google_client.recognize(config=config, audio=audio)
+        text = response.results[0].alternatives[0].transcript
+        transcription_path = os.path.join(
+            TRANSCRIPT_DIR, os.path.basename(segment_path).replace(".wav","_transcription.txt")
+        )
+        with open(transcription_path,"w") as f:
+            f.write(text)
+    except Exception:
+        logger.exception(f"Task failed for {segment_path}")
 @app.task
 def remove_segment_from_database(segment_path):
     #Yeah I know, use sqlite...
