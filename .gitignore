@@ -1,0 +1,6 @@
+__pycache__/*
+videos/*
+transcripts/*
+segments/*
+data_store.txt
+results.txt

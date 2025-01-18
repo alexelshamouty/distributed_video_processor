@@ -1,0 +1,5 @@
+celery
+redis
+flower
+ffmpeg-python 
+openai-whisper
