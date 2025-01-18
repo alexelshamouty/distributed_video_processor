@@ -10,3 +10,12 @@ docker run -it -p 6388:6379 redis
 ```
 5. Expose your brokers and your result backend externally or via a VPN for your remote workers
 6. Make sure you have shared storage ( ie: Mount videos/ segments/ transcripts from the master node, the one you'll be running main from
+
+
+* Because of slowness I decided to offload the analysis to google cloud, so make sure you adjust your workflow accordingly
+If you decide on using google cloud make sure you have the following ready before you start
+
+```
+gcloud init     
+gcloud auth application-default login
+```
