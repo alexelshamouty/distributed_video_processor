@@ -1,5 +1,5 @@
 import os
-from tasks import split_video,print_results,transcribe_result
+from tasks import split_video,print_results,transcribe_result,split_to_audio,cloud_transcribe_result
 from celery import chain
 from time import sleep
 from tasks import app
@@ -12,7 +12,7 @@ if __name__ == "__main__":
         video_path = os.path.join(VIDEOS_DIR, video_file)
 
         result = chain(
-            split_video.s(video_path),
+            split_to_audio.s(video_path),
             print_results.s(),
         ).apply_async()
 
@@ -29,14 +29,14 @@ if __name__ == "__main__":
                 tasks.remove(task_id)
         print("Tasks are still not finished")
         sleep(1)
-    
+
     print("Segmentation is done, now we read the results and transcribe it")
 
     transcribe_tasks = []
     with open("results.txt") as f:
         results = f.readlines()
         for result in results:
-            result = transcribe_result.delay(result.split(" ")[0])
+            result = cloud_transcribe_result.delay(result.split(" ")[0])
             transcribe_tasks.append(result.id)
     
     while not len(transcribe_tasks) == 0:
